@@ -1,0 +1,18 @@
+replaceKey(e, k)
+
+state()
+
+peekAt(n)
+
+merge(otherAPQ) 
+
+
+Time Complexity
+
+toggle():
+
+remove(e):
+
+peekAt(n): 
+
+merge(otherAPQ):
