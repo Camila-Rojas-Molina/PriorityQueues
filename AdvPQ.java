@@ -1,4 +1,13 @@
 /**
+--------------------------------------------------------------------------
+Assignment 3 - ADV PQ
+Name and ID: Camila Rojas (40321494) Section S
+Name and ID: Daniel Tehrani (40100248) Section X
+COMP 352 Winter 2026
+/---------------------------------------------------------------------------
+*/
+
+/**
  * Dual-heap Adaptable Priority Queue maintaining a min-heap and max-heap
  * over the same entries. Supports O(log n) arbitrary removal and key replacement
  * via per-entry index fields, O(1) mode toggle, and O(n+m) merge.

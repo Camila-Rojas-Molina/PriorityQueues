@@ -1,4 +1,13 @@
 /**
+--------------------------------------------------------------------------
+Assignment 3 - ADV PQ
+Name and ID: Camila Rojas (40321494) Section S
+Name and ID: Daniel Tehrani (40100248) Section X
+COMP 352 Winter 2026
+/---------------------------------------------------------------------------
+*/
+
+/**
  * A single entry in a dual-heap APQ, storing a key, value, and its
  * position in both heaps (minIndex / maxIndex). -1 means not inserted.
  *

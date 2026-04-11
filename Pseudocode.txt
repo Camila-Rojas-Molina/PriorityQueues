@@ -6,123 +6,110 @@ COMP 352 Winter 2026
 /---------------------------------------------------------------------------
 
 /-----------------------------------------------------------------------------------
-PSEUDOCODES:
+DATA STRUCTURE OVERVIEW
 /-----------------------------------------------------------------------------------
-function replaceKey(e, k):
-    if e == null:
-        throw error "invalid entry"
+Each Entry stores: key, value, minIndex, maxIndex
+APQ maintains: minHeap[], maxHeap[], size, mode (MIN or MAX)
 
-    // Validate that e is currently stored in this APQ
-    if e.minIndex < 0 or e.minIndex >= size or minHeap[e.minIndex] != e:
-        throw error "entry not in this APQ"
+Every swap in either heap must also update the stored index inside each entry.
+Both heaps are always kept valid; toggle() simply flips the mode flag in O(1).
 
-    if e.maxIndex < 0 or e.maxIndex >= size or maxHeap[e.maxIndex] != e:
-        throw error "entry not in this APQ"
+/-----------------------------------------------------------------------------------
+PSEUDOCODE
+/-----------------------------------------------------------------------------------
 
-    oldKey = e.key
-    e.key = k
-
-    // After changing the key, the heap order may be violated
-    // in both the min-heap and the max-heap.
-    restoreHeapOrder(MIN, e.minIndex)
-    restoreHeapOrder(MAX, e.maxIndex)
-
+Algorithm replaceKey(e, k):
+    // Precondition: e is a live entry in this APQ, k != null
+    validate(e)                            // check minIndex/maxIndex point back to e
+    oldKey <- e.key
+    e.key  <- k
+    upHeap(MIN, e.minIndex)                // new key may be smaller  -> bubble up
+    downHeap(MIN, e.minIndex)              // new key may be larger   -> sink down
+    upHeap(MAX, e.maxIndex)                // new key may be larger   -> bubble up
+    downHeap(MAX, e.maxIndex)              // new key may be smaller  -> sink down
     return oldKey
 
-function state():
-    // Return the current operating mode of the APQ
-    return mode
+    // At most one of upHeap / downHeap will move the entry; the other is a no-op.
+    // Time: O(log n)
 
-function peekAt(n):
-    if n < 1 or n > size:
-        throw error "index out of bounds"
+---
 
-    // Work with the heap that matches the current mode
-    if mode == MIN:
-        activeHeap = minHeap
-        candidateHeapType = MIN
-    else:
-        activeHeap = maxHeap
-        candidateHeapType = MAX
+Algorithm state():
+    return mode                            // mode in {MIN, MAX}
+    // Time: O(1)
 
-    // The candidate heap stores indices of nodes in activeHeap.
-    // This lets us find the n-th entry in priority order
-    // without removing anything from the real APQ.
-    create empty candidateHeap of type candidateHeapType
-    candidateHeap.insert(0)
+---
 
-    count = 0
-    answerIndex = -1
+Algorithm peekAt(n):
+    // Returns the n-th ranked entry (1-based) without removing it.
+    if n < 1 or n > size: throw error
+    H <- activeHeap()                      // minHeap if mode = MIN, else maxHeap
+    C <- empty candidate heap ordered like mode
+    C.insert(0)                            // seed with root index
 
-    while count < n:
-        answerIndex = candidateHeap.removeTop()
-        count = count + 1
+    for rank <- 1 to n:
+        i <- C.removeTop()                 // index of the rank-th best candidate
+        left  <- 2*i + 1
+        right <- 2*i + 2
+        if left  < size: C.insert(left)    // expose left child as next candidate
+        if right < size: C.insert(right)   // expose right child as next candidate
 
-        left = 2 * answerIndex + 1
-        right = 2 * answerIndex + 2
+    return H[i]
 
-        if left < size:
-            candidateHeap.insert(left)
+    // C holds at most 2n+1 indices, each heap op on C is O(log n).
+    // n removals + at most 2n insertions -> Time: O(n log n)
 
-        if right < size:
-            candidateHeap.insert(right)
+---
 
-    return activeHeap[answerIndex]
+Algorithm merge(otherAPQ):
+    // Merges all entries from otherAPQ into this APQ using Floyd's heapify.
+    if otherAPQ = null or otherAPQ.size = 0: return
+    m <- otherAPQ.size
 
-function merge(otherAPQ):
-    if otherAPQ == null or otherAPQ.size == 0:
-        return
+    grow arrays until capacity >= size + m  // double capacity as needed
 
-    ensure minHeap has capacity for size + otherAPQ.size
-    ensure maxHeap has capacity for size + otherAPQ.size
+    for i <- 0 to m - 1:
+        copy <- new Entry(otherAPQ.minHeap[i].key, otherAPQ.minHeap[i].value)
+        slot <- size + i
+        minHeap[slot] <- copy;  copy.minIndex <- slot
+        maxHeap[slot] <- copy;  copy.maxIndex <- slot
 
-    // Copy each entry from otherAPQ into this APQ.
-    // New entry objects are created so that index fields remain independent.
-    for i = 0 to otherAPQ.size - 1:
-        otherEntry = otherAPQ.minHeap[i]
-        newEntry = new Entry(otherEntry.key, otherEntry.value)
+    size <- size + m
 
-        minHeap[size] = newEntry
-        newEntry.minIndex = size
+    buildHeap(MIN)   // bottom-up Floyd heapify on all n+m elements: O(n+m)
+    buildHeap(MAX)   // same
 
-        maxHeap[size] = newEntry
-        newEntry.maxIndex = size
-
-        size = size + 1
-
-    // Restore heap order in both heaps
-    buildHeap(MIN)
-    buildHeap(MAX)
-
-Note:
-restoreHeapOrder(heapType, i) restores the heap property at index i
-by applying either up-heap or down-heap as needed.
-buildHeap(heapType) performs bottom-up heap construction on the chosen heap.
+    // Copying: O(m).  Two Floyd heapifies on n+m elements: O(n+m).
+    // Time: O(n + m)
 
 /-----------------------------------------------------------------------------------
-TIME COMPLEXITY
+TIME COMPLEXITIES (tight Big-O)
 /-----------------------------------------------------------------------------------
- 
-/-----------------------------------------------------------------------------------
-OUR PLAN
-/-----------------------------------------------------------------------------------
-- every entry lives in a min-heap and a max-heap at the same time
-- each entry stores:
-    - key
-    - value
-    - minIndex
-    - maxIndex
-the APQ stores:
-    - minHeap
-    - maxHeap
-    - size
-    - mode where mode is either MIN or MAX
-Every time you swap two entries in the heap, you must also update their stored indices.
 
-Design: A dual-heap APQ:
-    one min-heap
-    one max-heap
-    each entry stores two indices: one in the min-heap and one in the max-heap
-    toggle() just flips the current state, so it can be O(1)
-We keep both views ready all the time.
-We keep a min-heap and a max-heap at the same time, so switching is instant.
+toggle()
+    Flip one boolean flag (isMinMode = !isMinMode). No heap work.
+    Time: O(1)
+
+remove(e)
+    In each heap (min and max):
+        - Overwrite e's slot with the last entry and null out the last slot.
+        - Call upHeap then downHeap at the new position.
+    upHeap / downHeap each traverse at most the full height of an n-element
+    binary heap, which is floor(log2 n).  Four such traversals (two per heap)
+    is still O(log n).
+    Time: O(log n)
+
+peekAt(n)
+    A candidate heap C simulates in-order extraction from H without modifying H.
+    - n calls to C.removeTop(), each O(log |C|).
+    - At most 2n calls to C.insert(), each O(log |C|).
+    - |C| never exceeds 2n + 1, so log|C| = O(log n).
+    Total: O(n log n)
+
+merge(otherAPQ)  [n = this.size, m = otherAPQ.size]
+    - Array growth (if needed): O(n + m) amortised.
+    - Copy m entries into the backing arrays: O(m).
+    - buildHeap on n + m elements via bottom-up sifting:
+      sum_{i=0}^{floor(log(n+m))} (n+m)/2^i * O(1) = O(n + m)  (standard Floyd proof).
+    Two such builds (min and max) is still O(n + m).
+    Time: O(n + m)

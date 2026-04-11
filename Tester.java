@@ -1,4 +1,13 @@
 /**
+--------------------------------------------------------------------------
+Assignment 3 - ADV PQ
+Name and ID: Camila Rojas (40321494) Section S
+Name and ID: Daniel Tehrani (40100248) Section X
+COMP 352 Winter 2026
+/---------------------------------------------------------------------------
+*/
+
+/**
  * Test driver for the dual-heap Adaptable Priority Queue (AdvPQ).
  * Covers all ADT operations including edge cases, resizing, and exceptions.
  *
