@@ -94,19 +94,15 @@ function merge(otherAPQ):
     buildHeap(MIN)
     buildHeap(MAX)
 
+Note:
+restoreHeapOrder(heapType, i) restores the heap property at index i
+by applying either up-heap or down-heap as needed.
+buildHeap(heapType) performs bottom-up heap construction on the chosen heap.
+
 /-----------------------------------------------------------------------------------
 TIME COMPLEXITY
 /-----------------------------------------------------------------------------------
-
-    toggle():
-
-    remove(e):
-
-    peekAt(n): 
-
-    merge(otherAPQ):
-
-
+ 
 /-----------------------------------------------------------------------------------
 OUR PLAN
 /-----------------------------------------------------------------------------------
