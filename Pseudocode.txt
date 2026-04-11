@@ -1,29 +1,98 @@
+/--------------------------------------------------------------------------
+Assignment 3 - ADV PQ
+Name and ID: Camila Rojas (40321494) Section S
+Name and ID: Daniel Tehrani (40100248) Section X
+COMP 352 Winter 2026
+/---------------------------------------------------------------------------
+
 /-----------------------------------------------------------------------------------
 PSEUDOCODES:
 /-----------------------------------------------------------------------------------
+function replaceKey(e, k):
+    if e == null:
+        throw error "invalid entry"
 
-    replaceKey(e, k)
-        if e == null then throw error
-        int oldKey = e.key
-        idx = e.index
-        if idx <0 or idx >= size or A[idx] != ee:
-            throw error // entry not in this APQ
-        e.key = k 
+    // Validate that e is currently stored in this APQ
+    if e.minIndex < 0 or e.minIndex >= size or minHeap[e.minIndex] != e:
+        throw error "entry not in this APQ"
 
-        search for e
-        dequeue(e) or delete
-        point to where e was
-        enqueue(k) where e was
+    if e.maxIndex < 0 or e.maxIndex >= size or maxHeap[e.maxIndex] != e:
+        throw error "entry not in this APQ"
 
+    oldKey = e.key
+    e.key = k
 
-        
+    // After changing the key, the heap order may be violated
+    // in both the min-heap and the max-heap.
+    restoreHeapOrder(MIN, e.minIndex)
+    restoreHeapOrder(MAX, e.maxIndex)
 
-    state()
+    return oldKey
 
-    peekAt(n)
+function state():
+    // Return the current operating mode of the APQ
+    return mode
 
-    merge(otherAPQ) 
+function peekAt(n):
+    if n < 1 or n > size:
+        throw error "index out of bounds"
 
+    // Work with the heap that matches the current mode
+    if mode == MIN:
+        activeHeap = minHeap
+        candidateHeapType = MIN
+    else:
+        activeHeap = maxHeap
+        candidateHeapType = MAX
+
+    // The candidate heap stores indices of nodes in activeHeap.
+    // This lets us find the n-th entry in priority order
+    // without removing anything from the real APQ.
+    create empty candidateHeap of type candidateHeapType
+    candidateHeap.insert(0)
+
+    count = 0
+    answerIndex = -1
+
+    while count < n:
+        answerIndex = candidateHeap.removeTop()
+        count = count + 1
+
+        left = 2 * answerIndex + 1
+        right = 2 * answerIndex + 2
+
+        if left < size:
+            candidateHeap.insert(left)
+
+        if right < size:
+            candidateHeap.insert(right)
+
+    return activeHeap[answerIndex]
+
+function merge(otherAPQ):
+    if otherAPQ == null or otherAPQ.size == 0:
+        return
+
+    ensure minHeap has capacity for size + otherAPQ.size
+    ensure maxHeap has capacity for size + otherAPQ.size
+
+    // Copy each entry from otherAPQ into this APQ.
+    // New entry objects are created so that index fields remain independent.
+    for i = 0 to otherAPQ.size - 1:
+        otherEntry = otherAPQ.minHeap[i]
+        newEntry = new Entry(otherEntry.key, otherEntry.value)
+
+        minHeap[size] = newEntry
+        newEntry.minIndex = size
+
+        maxHeap[size] = newEntry
+        newEntry.maxIndex = size
+
+        size = size + 1
+
+    // Restore heap order in both heaps
+    buildHeap(MIN)
+    buildHeap(MAX)
 
 /-----------------------------------------------------------------------------------
 TIME COMPLEXITY
