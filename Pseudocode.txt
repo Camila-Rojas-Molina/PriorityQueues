@@ -1,18 +1,63 @@
-replaceKey(e, k)
+/-----------------------------------------------------------------------------------
+PSEUDOCODES:
+/-----------------------------------------------------------------------------------
 
-state()
+    replaceKey(e, k)
+        if e == null then throw error
+        int oldKey = e.key
+        idx = e.index
+        if idx <0 or idx >= size or A[idx] != ee:
+            throw error // entry not in this APQ
+        e.key = k 
 
-peekAt(n)
+        search for e
+        dequeue(e) or delete
+        point to where e was
+        enqueue(k) where e was
 
-merge(otherAPQ) 
+
+        
+
+    state()
+
+    peekAt(n)
+
+    merge(otherAPQ) 
 
 
-Time Complexity
+/-----------------------------------------------------------------------------------
+TIME COMPLEXITY
+/-----------------------------------------------------------------------------------
 
-toggle():
+    toggle():
 
-remove(e):
+    remove(e):
 
-peekAt(n): 
+    peekAt(n): 
 
-merge(otherAPQ):
+    merge(otherAPQ):
+
+
+/-----------------------------------------------------------------------------------
+OUR PLAN
+/-----------------------------------------------------------------------------------
+- every entry lives in a min-heap and a max-heap at the same time
+- each entry stores:
+    - key
+    - value
+    - minIndex
+    - maxIndex
+the APQ stores:
+    - minHeap
+    - maxHeap
+    - size
+    - mode where mode is either MIN or MAX
+Every time you swap two entries in the heap, you must also update their stored indices.
+
+Design: A dual-heap APQ:
+    one min-heap
+    one max-heap
+    each entry stores two indices: one in the min-heap and one in the max-heap
+    toggle() just flips the current state, so it can be O(1)
+We keep both views ready all the time.
+We keep a min-heap and a max-heap at the same time, so switching is instant.
