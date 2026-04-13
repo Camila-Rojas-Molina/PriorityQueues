@@ -76,8 +76,6 @@ Algorithm merge(otherAPQ):
 
     size <- size + m
 
-    buildHeap(MIN)   // bottom-up Floyd heapify on all n+m elements: O(n+m)
-    buildHeap(MAX)   // same
 
     // Copying: O(m).  Two Floyd heapifies on n+m elements: O(n+m).
     // Time: O(n + m)

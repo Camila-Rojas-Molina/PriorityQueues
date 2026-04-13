@@ -63,7 +63,7 @@ public class AdvPQ<K extends Comparable<K>, V> {
 
     public String state() { return isMinMode ? "MIN" : "MAX"; }
 
-    public void toggle() { isMinMode = !isMinMode; }
+    public void toggle() { isMinMode = !isMinMode; } //o(1) cool efficiency
 
     // =========================================================================
     // insert
